@@ -1,8 +1,14 @@
 let points = [];
 let cost = [];
+let graph;
+let lpa;
+let costChanged = true;
 
 function setup() {
   createCanvas(WIDTH, HEIGHT);
+
+  graph = new Graph(POINT_NUM, startN, endN);
+  console.log(graph);
 
   for (let i = 0; i < POINT_NUM; i++) {
     let x = int(random()*(WIDTH-2*POINT_SIZE)+POINT_SIZE);
@@ -10,24 +16,17 @@ function setup() {
     points.push(createVector(x, y));
 
     let tmp = [];
+    let good = false;
     for (let j = 0; j < POINT_NUM; j++) {
       if (j == i) {
-        tmp.push(0)
+        tmp.push(0);
+      } else if (graph.getSucc(i).includes(j)) {
+        tmp.push(int(random(MIN_COST, MAX_COST+1)));
       } else {
-        let good = false;
-        for (let k = 0; k < tmp.length; k++) {
-          if (tmp[k] > 0) {
-            good = true;
-            break;
-          }
-        }
-        if (random() < 0.5 || !good) {
-          tmp.push(int(random(MIN_COST, MAX_COST+1)));
-        } else {
-          tmp.push(-1);
-        }
+        tmp.push(-1);
       }
     }
+
     cost.push(tmp);
   }
 
@@ -37,6 +36,8 @@ function setup() {
     }
   }
   console.log(cost);
+
+  lpa = new LPAStar(startN, endN, points, cost, graph);
 }
 
 function draw() {
@@ -63,4 +64,6 @@ function draw() {
     text(i, points[i].x, points[i].y);
     stroke(255, 255, 255);
   }
+
+  costChanged = lpa.MainStep(costChanged);
 }

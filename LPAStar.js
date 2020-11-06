@@ -1,133 +1,137 @@
-class Queue {
-  constructor() {
-    this.q = [];
-  }
-
-  push(id, weight) {
-    let elem = {id: id, weight: weight};
-    if (this.q.length == 0) {
-      this.q.push(elem);
-      return;
-    }
-
-    let i = 0;
-    while (i < this.q.length && this.q[i].weight > elem.weight) {
-      i++;
-    }
-    this.q.splice(i, 0, elem);
-  }
-
-  pop() {
-    return this.q.splice(this.q.length-1, 1)[0];
-  }
-
-  topKey() {
-    if (this.q.length > 0) {
-      return this.q[this.q.length-1];
-    } else {
-      return {id: Number.MAX_VALUE, weight: Number.MAX_VALUE};
-    }
-  }
-
-  remove(id) {
-    let i = 0;
-    while (i <= this.q.length && this.q.id != id) {
-      i++;
-    }
-    if (i < this.q.length) {
-      this.q.splice(i, 1);
-    }
-  }
-}
-
 let gA = [];
 let rhsA = [];
-let predA = [];
-let succA = [];
-let startN = 0;
-let endN = 0;
+let costA, oldCostA;
 
-for (let i = 0; i < POINT_NUM; i++) {
-  predA.push([]);
-  succA.push([]);
-}
+class LPAStar {
 
-function g(s){
-  return gA[s];
-}
+  constructor(startN, endN, points, cost, graph) {
+    this.startN = startN;
+    this.endN = endN;
 
-function gStar(s) {
-  if (s == startN) {
-    return 0;
+    this.gA = [];
+    this.rhsA = [];
+    this.costA = cost;
+    this.oldCostA = cost;
+
+    this.points = points;
+    this.size = this.points.length;
+    this.graph = graph;
+
+    this.U = new Queue();
+
+    this.Initalize(POINT_NUM, 0, POINT_NUM-1);
   }
-  let pred = getPred(s);
-  let val = Number.MAX_VALUE;
-  for (let i = 0; i < pred.length; i++) {
-    if (gStar(i) + c(i, s) < val) {
-      val = gStar(i) + c(i, s);
+
+  g(s) {
+    return this.gA[s];
+  }
+
+  rhs(s) {
+    return this.rhsA[s];
+  }
+
+  h(s) {
+    let last = this.points[endN];
+    let cur = this.points[s];
+    return Math.pow(Math.pow(last.x - cur.x, 2) + Math.pow(last.y - cur.y, 2), 0.5);
+  }
+
+  c(s, sP) {
+    return this.costA[s, sP];
+  }
+
+  CalculateKey(s) {
+    return [min(this.g(s), this.rhs(s)) + this.h(s), min(this.g(s), this.rhs(s))];
+  }
+
+  Initalize() {
+    for (let i = 0; i < this.size; i++) {
+      this.rhsA.push(Number.MAX_VALUE);
+      this.gA.push(Number.MAX_VALUE);
+    }
+    this.rhsA[this.startN] = 0;
+    this.U.push(this.startN, this.h(this.startN));
+  }
+
+  UpdateVertex(u) {
+    if (u != this.startN) {
+      let predecessors = this.graph.getPred(u);
+      let newRhs = Number.MAX_VALUE;
+      for (let i = 0; i < predecessors.length; i++) {
+        newRhs = min(newRhs, this.g(predecessors[i]) + this.c(predecessors[i], u));
+      }
+      this.rhsA[u] = newRhs;
+    }
+    this.U.remove(u); //removes u if it is in U
+    if (this.g(u) != this.rhs(u)) {
+      this.U.push(u, this.CalculateKey(u));
     }
   }
-  return val;
-}
 
-function rhs(s) {
-  return rhsA[s];
-}
-
-function h(s) {
-  let last = points[endN];
-  let cur = points[s];
-  return pow(pow(last.x - cur.x, 2) + pow(last.y - cur.y, 2), 0.5);
-}
-
-function c(s, s') {
-  return cost[s, s'];
-}
-
-function CalculateKey(s) {
-  return [min(g(s), rhs(s)) + h(s), min(g(s), rhs(s))];
-}
-
-function Initalize(size, start, end) {
-  startN = start;
-  endN = end;
-  U = new Queue();
-  for (let i = 0; i < size; i++) {
-    rhsA.push(Number.MAX_VALUE);
-    gA.push(Number.MAX_VALUE);
-  }
-  rhsA[start] = 0;
-  U.push(start, h(start))
-}
-
-function UpdateVertex(u) {
-  if (u != startN) {
-    // rhsA[u] = min  //NEED TO SET rhsA[u] to the min of g(s')+c(s',u) where s' is any predecessors
-  }
-  U.remove(u); //removes u if it is in U
-  if (g(u) != rhs(u)) {
-    U.push(u, CalculateKey(u));
-  }
-}
-
-function ComputeShortestPath() {
-  while (U.topKey() < CalculateKey(endN) || rhs(endN) != g(endN)) {
-    u = U.pop();
-    if (g(u) > rhs(u)) {
-      gA[u] = rhs(u);
-      //forall successors, UpdateVertex (NEED TO IMPLEMENT)
-    } else {
-      gA[u] = Number.MAX_VALUE;
-      //forall successors as well as u, UpdateVertex (NEED TO IMPLEMENT)
+  ComputeShortestPath() {
+    while (this.U.topKey() < this.CalculateKey(this.endN) || this.rhs(this.endN) != this.g(this.endN)) {
+      let u = this.U.pop();
+      if (this.g(u) > this.rhs(u)) {
+        this.gA[u] = this.rhs(u);
+        let successors = this.graph.getSucc(u);
+        for (let i = 0; i < successors.length; i++) {
+          this.UpdateVertex(successors[i]);
+        }
+      } else {
+        this.gA[u] = Number.MAX_VALUE;
+        this.UpdateVertex(u);
+        let successors = this.graph.getSucc(u);
+        for (let i = 0; i < successors.length; i++) {
+          this.UpdateVertex(successors[i]);
+        }
+      }
     }
   }
-}
 
-function Main() {
-  Initalize(POINT_NUM, 0, POINT_NUM-1);
-  while (true) {
-    ComputeShortestPath();
-    //Get all changed edge costs: directed edge (u, v)
-    //forall edges with changed costs, update edge cost (u, v), UpdateVertex(v)
+  Main() {
+    while (true) {
+      this.ComputeShortestPath();
+      while (true) {
+        if (this.costA != this.oldCostA) {
+          let pairs = [];
+          for (let i = 0; i < POINT_NUM; i++) {
+            for (let j = i+1; j < POINT_NUM; j++) {
+              if (this.costA[i][j] != this.oldCostA[i][j]) {
+                pairs.push([i, j]);
+              }
+            }
+          }
+          for (let i = 0; i < pairs.length; i++) {
+            this.UpdateVertex(pairs[i][1]);
+          }
+        }
+      }
+      this.oldCostA = this.costA;
+    }
+  }
+
+  MainStep(costChanged) {
+    let out = false;
+    if (costChanged) {
+      this.ComputeShortestPath();
+    }
+    out = (this.costA != this.oldCostA);
+    if (this.costA != this.oldCostA) {
+      let pairs = [];
+      for (let i = 0; i < POINT_NUM; i++) {
+        for (let j = i+1; j < POINT_NUM; j++) {
+          if (this.costA[i][j] != this.oldCostA[i][j]) {
+            pairs.push([i, j]);
+          }
+        }
+      }
+      for (let i = 0; i < pairs.length; i++) {
+        this.UpdateVertex(pairs[i][1]);
+      }
+    }
+    if (costChanged) {
+      this.oldCostA = this.costA;
+    }
+    return out;
   }
 }

@@ -37,11 +37,11 @@ class LPAStar {
   }
 
   c(s, sP) {
-    return this.costA[s, sP];
+    return this.costA[s][sP];
   }
 
   CalculateKey(s) {
-    return [min(this.g(s), this.rhs(s)) + this.h(s), min(this.g(s), this.rhs(s))];
+    return min(this.g(s), this.rhs(s)) + this.h(s);//[min(this.g(s), this.rhs(s)) + this.h(s), min(this.g(s), this.rhs(s))];
   }
 
   Initalize() {

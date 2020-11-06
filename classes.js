@@ -21,14 +21,14 @@ class Queue {
   }
 
   pop() {
-    return this.q.splice(this.q.length-1, 1)[0];
+    return this.q.splice(this.q.length-1, 1)[0].id;
   }
 
   topKey() {
     if (this.q.length > 0) {
-      return this.q[this.q.length-1];
+      return this.q[this.q.length-1].weight;
     } else {
-      return {id: Number.MAX_VALUE, weight: Number.MAX_VALUE};
+      return Number.MAX_VALUE;
     }
   }
 
@@ -71,7 +71,7 @@ class Graph {
     this.start = start;
     this.end = end;
     this.nodes = [];
-    this.prob = 0.75;
+    this.prob = 0.5;
 
     for (let i = 0; i < POINT_NUM; i++) {
       this.nodes.push(new Node(i));
@@ -79,7 +79,7 @@ class Graph {
 
     for (let i = 0; i < POINT_NUM; i++) {
       for (let j = 0; j < POINT_NUM; j++) {
-        if (i != j && random() < this.prob && i != this.end) {
+        if (i != j && random() < this.prob && i != this.end && !(i == this.start && j == this.end)) {
           this.nodes[i].addSucc(j);
         }
       }

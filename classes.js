@@ -6,6 +6,14 @@ class Queue {
     this.q = [];
   }
 
+  compareWeights(weight0, weight1) {
+    if (weight0[0] == weight1[0]) {
+      return weight0[1] > weight1[1];
+    } else {
+      return weight0[0] > weight1[0];
+    }
+  }
+
   push(id, weight) {
     let elem = {id: id, weight: weight};
     if (this.q.length == 0) {
@@ -14,7 +22,7 @@ class Queue {
     }
 
     let i = 0;
-    while (i < this.q.length && this.q[i].weight > elem.weight) {
+    while (i < this.q.length && this.compareWeights(this.q[i].weight, elem.weight)) {
       i++;
     }
     this.q.splice(i, 0, elem);

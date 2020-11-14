@@ -41,7 +41,7 @@ class LPAStar {
   }
 
   CalculateKey(s) {
-    return min(this.g(s), this.rhs(s)) + this.h(s);//[min(this.g(s), this.rhs(s)) + this.h(s), min(this.g(s), this.rhs(s))];
+    return [min(this.g(s), this.rhs(s)) + this.h(s), min(this.g(s), this.rhs(s))];
   }
 
   Initalize() {
@@ -50,7 +50,7 @@ class LPAStar {
       this.gA.push(Number.MAX_VALUE);
     }
     this.rhsA[this.startN] = 0;
-    this.U.push(this.startN, this.h(this.startN));
+    this.U.push(this.startN, [this.h(this.startN), 0]);
   }
 
   UpdateVertex(u) {
@@ -69,8 +69,9 @@ class LPAStar {
   }
 
   ComputeShortestPath() {
-    while (this.U.topKey() < this.CalculateKey(this.endN) || this.rhs(this.endN) != this.g(this.endN)) {
+    while (!this.U.compareWeights(this.U.topKey(), this.CalculateKey(this.endN)) || this.rhs(this.endN) != this.g(this.endN)) {
       let u = this.U.pop();
+      console.log(u);
       if (this.g(u) > this.rhs(u)) {
         this.gA[u] = this.rhs(u);
         let successors = this.graph.getSucc(u);

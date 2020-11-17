@@ -4,14 +4,14 @@ let costA, oldCostA;
 
 class LPAStar {
 
-  constructor(startN, endN, points, cost, graph) {
+  constructor(startN, endN, points, graph) {
     this.startN = startN;
     this.endN = endN;
 
     this.gA = [];
     this.rhsA = [];
-    this.costA = cost;
-    this.oldCostA = cost;
+    this.costA = graph.cost;
+    this.oldCostA = graph.cost;
 
     this.points = points;
     this.size = this.points.length;
@@ -65,33 +65,43 @@ class LPAStar {
     this.U.remove(u); //removes u if it is in U
     if (this.g(u) != this.rhs(u)) {
       this.U.push(u, this.CalculateKey(u));
+      return true;
     }
+    return false;
   }
 
   ComputeShortestPath() {
+    let path = [];
+    for (let i = 0; i < POINT_NUM; i++) {
+      path.push(-1);
+    }
     while (!this.U.compareWeights(this.U.topKey(), this.CalculateKey(this.endN)) || this.rhs(this.endN) != this.g(this.endN)) {
       let u = this.U.pop();
-      console.log(u);
       if (this.g(u) > this.rhs(u)) {
         this.gA[u] = this.rhs(u);
         let successors = this.graph.getSucc(u);
         for (let i = 0; i < successors.length; i++) {
-          this.UpdateVertex(successors[i]);
+          if (this.UpdateVertex(successors[i])) {
+            path[successors[i]] = u;
+          }
         }
       } else {
         this.gA[u] = Number.MAX_VALUE;
         this.UpdateVertex(u);
         let successors = this.graph.getSucc(u);
         for (let i = 0; i < successors.length; i++) {
-          this.UpdateVertex(successors[i]);
+          if (this.UpdateVertex(successors[i])) {
+            path[successors[i]] = u;
+          }
         }
       }
     }
+    return path;
   }
 
   Main() {
     while (true) {
-      this.ComputeShortestPath();
+      console.log(this.ComputeShortestPath());
       while (true) {
         if (this.costA != this.oldCostA) {
           let pairs = [];
@@ -114,7 +124,7 @@ class LPAStar {
   MainStep(costChanged) {
     let out = false;
     if (costChanged) {
-      this.ComputeShortestPath();
+      console.log(this.ComputeShortestPath());
     }
     out = (this.costA != this.oldCostA);
     if (this.costA != this.oldCostA) {

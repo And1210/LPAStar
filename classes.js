@@ -56,20 +56,30 @@ class Node {
     this.num = num;
     this.pred = [];
     this.succ = [];
+    this.conn = [];
   }
 
   addPred(n) {
     this.pred.push(n);
   }
   getPred() {
-    return this.pred;
+    return this.conn;//this.pred;
   }
 
   addSucc(n) {
     this.succ.push(n);
   }
   getSucc() {
-    return this.succ;
+    return this.conn;//this.succ;
+  }
+
+  addConn(n) {
+    if (!this.conn.includes(n)) {
+      this.conn.push(n);
+    }
+  }
+  getConn() {
+    return this.conn;
   }
 }
 
@@ -79,6 +89,7 @@ class Graph {
     this.start = start;
     this.end = end;
     this.nodes = [];
+    this.cost = [];
     this.prob = 0.5;
 
     for (let i = 0; i < POINT_NUM; i++) {
@@ -86,20 +97,42 @@ class Graph {
     }
 
     for (let i = 0; i < POINT_NUM; i++) {
+      let tmp = [];
       for (let j = 0; j < POINT_NUM; j++) {
-        if (i != j && random() < this.prob && i != this.end && !(i == this.start && j == this.end)) {
-          this.nodes[i].addSucc(j);
-        }
+        tmp.push(-1);
       }
+      this.cost.push(tmp);
     }
 
     for (let i = 0; i < POINT_NUM; i++) {
       for (let j = 0; j < POINT_NUM; j++) {
-        if (i != j && this.nodes[j].getSucc().includes(i) && i != this.start) {
-          this.nodes[i].addPred(j);
+        if (i != j && !(i == this.start && j == this.end || i == this.end && j == this.start)) {
+          if (!this.nodes[j].getConn().includes[i] && random() < this.prob) {
+            this.nodes[i].addConn(j);
+            this.nodes[j].addConn(i);
+            let curCost = int(random(MIN_COST, MAX_COST+1));
+            this.cost[i][j] = curCost;
+            this.cost[j][i] = curCost;
+          }
         }
       }
     }
+
+    // for (let i = 0; i < POINT_NUM; i++) {
+    //   for (let j = 0; j < POINT_NUM; j++) {
+    //     if (i != j && random() < this.prob && i != this.end && !(i == this.start && j == this.end) && !(this.nodes[j].getSucc().includes(i))) {
+    //       this.nodes[i].addSucc(j);
+    //     }
+    //   }
+    // }
+    //
+    // for (let i = 0; i < POINT_NUM; i++) {
+    //   for (let j = 0; j < POINT_NUM; j++) {
+    //     if (i != j && this.nodes[j].getSucc().includes(i) && i != this.start) {
+    //       this.nodes[i].addPred(j);
+    //     }
+    //   }
+    // }
   }
 
   getNode(num) {

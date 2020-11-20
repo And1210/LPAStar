@@ -1,5 +1,5 @@
 let points = [];
-// let cost = [];
+let mouseIn = -1;
 let graph;
 let lpa;
 let costChanged = true;
@@ -66,5 +66,38 @@ function draw() {
     stroke(255, 255, 255);
   }
 
+  //Make points moveable
+  let inNode = false;
+  for (let i = 0; i < POINT_NUM; i++) {
+    let cur = points[i];
+    if (pow(cur.x - mouseX, 2) + pow(cur.y - mouseY, 2) <= pow(POINT_SIZE/2, 2)) {
+      // console.log("In Node: " + i);
+      mouseIn = i;
+      inNode = true;
+      break;
+    }
+  }
+  if (!inNode) {
+    mouseIn = -1;
+  }
+
   costChanged = lpa.MainStep(costChanged);
+}
+
+function mousePressed() {
+  if (mouseIn != -1) {
+    points[mouseIn].set(mouseX, mouseY);
+  }
+  lpa.updatePoints(points);
+}
+
+function mouseDragged() {
+  if (mouseIn != -1) {
+    points[mouseIn].set(mouseX, mouseY);
+  }
+  lpa.updatePoints(points);
+}
+
+function mouseReleased() {
+  lpa.updatePoints(points);
 }

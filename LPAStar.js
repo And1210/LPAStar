@@ -22,10 +22,14 @@ class LPAStar {
     this.Initalize(POINT_NUM, 0, POINT_NUM-1);
   }
 
-  PrintNodes() {
+  printNodes() {
     for (let i = 0; i < POINT_NUM; i++) {
       console.log("Node: " + i + "      Key: " + lpa.CalculateKey(i));
     }
+  }
+
+  updatePoints(newPoints) {
+    this.points = newPoints;
   }
 
   g(s) {

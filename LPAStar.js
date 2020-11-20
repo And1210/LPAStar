@@ -22,6 +22,12 @@ class LPAStar {
     this.Initalize(POINT_NUM, 0, POINT_NUM-1);
   }
 
+  PrintNodes() {
+    for (let i = 0; i < POINT_NUM; i++) {
+      console.log("Node: " + i + "      Key: " + lpa.CalculateKey(i));
+    }
+  }
+
   g(s) {
     return this.gA[s];
   }
@@ -33,7 +39,7 @@ class LPAStar {
   h(s) {
     let last = this.points[endN];
     let cur = this.points[s];
-    return Math.pow(Math.pow(last.x - cur.x, 2) + Math.pow(last.y - cur.y, 2), 0.5);
+    return (Math.pow(Math.pow(last.x - cur.x, 2) + Math.pow(last.y - cur.y, 2), 0.5))/10;
   }
 
   c(s, sP) {

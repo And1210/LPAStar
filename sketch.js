@@ -60,6 +60,7 @@ function draw() {
     stroke(255);
     noFill();
     circle(points[i].x, points[i].y, POINT_SIZE);
+    text(round(lpa.h(i)*10)/10, points[i].x-10, points[i].y+25)
     stroke(127, 127, 255);
     text(i, points[i].x, points[i].y);
     stroke(255, 255, 255);
